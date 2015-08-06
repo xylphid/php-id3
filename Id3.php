@@ -179,28 +179,36 @@ class Id3 extends GetSet
 		if ($file != null)
 		{
 			try {
-				// Remote files not supported
-				if (preg_match('/^(ht|f)tp:\/\//', $file))
-				    throw new Exception(__METHOD__.' : Remote files are not supported - please copy the file locally first.');
-				if (!file_exists($file))
-					throw new Exception( __METHOD__ . ' : File not found.');
-					
-				$this->_mediaFile = $file;
-				if (($this->_reader = fopen($this->_mediaFile, 'r')) === false)
-					throw new Exception(__METHOD__ . ' : Unable to open file.');
-				
-				$this->extractHeaders();
-				if ($this->_headers['signature'] == 'ID3')
-				{
-					$this->_compliant = true;
-					$this->extractTags();
-					ksort($this->_properties);
-					fclose($this->_reader);
-				}
+				$this->setFilename($file);
+				$this->processFile();
 			}
 			catch (Exception $e) {
 				trigger_error( $e->getMessage() );
 			}
+		}
+	}
+
+	/**
+	 * Process tag extraction
+	 * @throws Exception
+	 * @return void
+	 */
+	public function processFile() {
+		try {
+			if (($this->_reader = fopen($this->_mediaFile, 'r')) === false)
+				throw new Exception(__METHOD__ . ' : Unable to open file.');
+
+			$this->extractHeaders();
+			if ($this->_headers['signature'] == 'ID3')
+			{
+				$this->_compliant = true;
+				$this->extractTags();
+				ksort($this->_properties);
+				fclose($this->_reader);
+			}
+		}
+		catch (Exception $e) {
+			trigger_error( $e->getMessage() );
 		}
 	}
 	
@@ -224,7 +232,6 @@ class Id3 extends GetSet
 	public function debug()
 	{
 		var_dump($this);
-		//print '<pre>' . print_r($this, true) . '</pre>';
 	}
 
 	/**
@@ -262,7 +269,7 @@ class Id3 extends GetSet
 	 * throws Exception
 	 * @return boolean
 	 */
-	public function extractTags()
+	protected function extractTags()
 	{
 		try {
 			$options = array(
@@ -357,9 +364,23 @@ class Id3 extends GetSet
 		fwrite($this->_reader, $buffer);
 		fclose($this->_reader);
 	}
+
+	/**
+	 * Set filename
+	 * @throws Exception
+	 * @return void
+	 */
+	public function setFilename($file) {
+		// Remote files not supported
+		if (preg_match('/^(ht|f)tp:\/\//', $file))
+		    throw new Exception(__METHOD__.' : Remote files are not supported - please copy the file locally first.');
+		if (!file_exists($file))
+			throw new Exception( __METHOD__ . ' : File not found.');
+
+		$this->_mediaFile = $file;
+	}
 	
-	protected function _get($property)
-	{
+	protected function _get($property) {
 		if (property_exists($this, $property) || array_key_exists($property, $this->_properties))
 			return parent::_get($property);
 			
