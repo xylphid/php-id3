@@ -5,31 +5,42 @@ PHP-ID3 is a native php lib for ID3 tags
 ## Compatibility
 PHP-ID3 is tested on the following PHP version :
 
-* PHP 5.3
-* PHP 5.4
-* PHP 5.5
+* PHP 8.2
+
+## Installation
+```bash
+composer install xylphid/php-id3
+```
 
 ## Usage
 
 ### PHP Script
 
 Step by step extraction :
+```php
+use Id3\Id3;
 
-    media = '/path/to/media/file.mp3';
-    $id3 = new Id3();
-    $id3->setFilename($media);
-    $id3->processFile();
-
+$media = '/path/to/media/file.mp3';
+$id3 = new Id3();
+$id3->setFilename($media);
+$id3->processFile();
+```
 Auto process :
-
-    $media = '/path/to/media/file.mp3';
-    $id3 = new Id3($media);
+```php
+$media = '/path/to/media/file.mp3';
+$id3 = new Id3($media);
+```
 
 Found tags are registered as object properties and named according to Id3 specifications. You can display tags with :
-
-    if ($id3->isCompliant()) {
-        printf("Artist : %s\n", $id3->getTpe1());
-        printf("Album : %s\n", $id3->getTalb());
-        printf("Title : %s\n", $id3->getTit2());
-        printf("Track : %s\n", $id3->getTrck());
-    }
+```php
+if ($id3->isCompliant()) {
+    printf("Title : %s\n", $id3->getTitle());
+    printf("Artist : %s\n", $id3->getArtist());
+    printf("Album : %s\n", $id3->getAlbum());
+    printf("Track : %s\n", $id3->getTrack());
+    printf("PartOfSet : %s\n", $id3->getPartOfSet());
+    printf("Genre : %s\n", $id3->getGenre());
+    printf("Year : %s\n", $id3->getYear());
+    printf("Duration : %s\n", $id3->getDuration())
+}
+```

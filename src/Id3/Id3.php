@@ -6,6 +6,7 @@ use Id3\Exception\FileNotFoundException;
 use Id3\Exception\FileReadException;
 use Id3\Exception\NotCompliantException;
 use Id3\Exception\RemoteFilenameException;
+use Id3\Frame\Frame;
 use Id3\Frame\TextFrame;
 use Id3\Std\Collection;
 
@@ -194,7 +195,7 @@ class Id3 extends GetSet {
      * @return void
      * @throws FileReadException
      */
-    public function processFile() {
+    public function processFile(): void {
         if (($this->_reader = fopen($this->_mediaFile, 'r')) === false) {
             throw new FileReadException(__METHOD__ . ' : Unable to open file.');
         }
@@ -210,10 +211,8 @@ class Id3 extends GetSet {
 
     /**
      * Cleanup Id3 tags
-     * @return boolean
      */
-    protected function clean() {
-        $fsize = filesize($this->_mediaFile);
+    protected function clean(): void {
         $content = file_get_contents($this->_mediaFile);
         $this->_reader = fopen($this->_mediaFile, 'w');
         fwrite($this->_reader, substr($content, $this->_headers['size']));
@@ -230,10 +229,9 @@ class Id3 extends GetSet {
 
     /**
      * Extract ID3 Headers
-     * @throws Exception
-     * @return boolean
+     * @return void
      */
-    protected function extractHeaders(): bool {
+    protected function extractHeaders(): void {
         try {
             $this->_headers = fread($this->_reader, 10);
             $this->_headers = unpack("a3signature/c1version_major/c1version_minor/c1flags/Nsize", $this->_headers);
@@ -254,20 +252,17 @@ class Id3 extends GetSet {
             if (($this->_headers['flags'] & self::FOOTER) == self::FOOTER) {
                 error_log('ID3 header flag contains FOOTER');
             }
-            return true;
         }
         catch (NotCompliantException $e) {
             trigger_error($e->getMessage());
-            return false;
         }
     }
 
     /**
      * Extract ID3 tags
-     * throws Exception
-     * @return boolean
+     * @return void
      */
-    protected function extractTags(): bool {
+    protected function extractTags(): void {
         try {
             $options = array(
                 'reader'    => $this->_reader,
@@ -304,13 +299,15 @@ class Id3 extends GetSet {
                     var_dump($this->$getter());
                 }
             }
-            return true;
         } catch (Exception $e) {
             trigger_error($e->getMessage());
-            return false;
         }
     }
 
+    /**
+     * Get ID3 tag size
+     * @return int
+     */
     public function getSize(): int {
         $size = 10;
         foreach ($this->_properties as $tag => $obj) {
@@ -405,7 +402,7 @@ class Id3 extends GetSet {
         }
     }
 
-    protected function _has($property) {
+    protected function _has($property): bool {
         if (property_exists($this, $property) || array_key_exists($property, $this->_properties)) {
             return parent::_has($property);
         }
@@ -453,7 +450,7 @@ class Id3 extends GetSet {
         return intval(trim($this->getTle() ?: $this->getTlen() ?: ''));
     }
 
-    public function getAlbumImage() {
+    public function getAlbumImage(): ?Frame {
         $images = $this->getPic() ?: $this->getApic() ?: null;
         if ($images instanceof Collection) {
             foreach ($images as $item) {

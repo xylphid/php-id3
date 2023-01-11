@@ -80,7 +80,7 @@ abstract class GetSet {
      * @param $property
      * @return bool
      */
-    protected function _has($property) {
+    protected function _has($property): bool {
         $property[0] = strtolower($property[0]);
         return (property_exists($this, $property) || array_key_exists($property, $this->_properties));
     }
@@ -90,7 +90,7 @@ abstract class GetSet {
      * @param $property
      * @return bool
      */
-    protected function _is($property) {
+    protected function _is($property): bool {
         $property[0] = strtolower($property[0]);
         if (property_exists($this, $property) && $this->$property === true) {
             return true;

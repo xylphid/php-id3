@@ -1,0 +1,22 @@
+{
+  "name": "xylphid/php-id3",
+  "type": "library",
+  "description": "ID3 tag reader / writer",
+  "keywords": ["id3", "media"],
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.0.0"
+  },
+  "authors": [
+    {
+      "name": "Anthony PERIQUET",
+      "email": "anthonyperiquet@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "Id3\\": "src/Id3/"
+    }
+  }
+}
