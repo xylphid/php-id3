@@ -417,6 +417,10 @@ class Id3 extends GetSet {
         return trim($this->getTal() ?: $this->getTalb() ?: '');
     }
 
+    public function getAlbumArtist(): string {
+        return trim($this->getTp2() ?: $this->getTpe2() ?: '');
+    }
+
     public function getYear(): string {
         return trim($this->getTye() ?: $this->getTyer() ?: '');
     }
