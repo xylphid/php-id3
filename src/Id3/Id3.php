@@ -6,6 +6,7 @@ use Id3\Exception\FileNotFoundException;
 use Id3\Exception\FileReadException;
 use Id3\Exception\NotCompliantException;
 use Id3\Exception\RemoteFilenameException;
+use Id3\Frame\Apic;
 use Id3\Frame\Frame;
 use Id3\Frame\TextFrame;
 use Id3\Std\Collection;
@@ -177,10 +178,12 @@ class Id3 extends GetSet {
         'wpub' => 'Publishers official webpage',
         'wxxx' => 'User defined URL link frame',
     ];
+
     /**
      * @param string|null $file File to process
      * @throws FileNotFoundException
      * @throws FileReadException
+     * @throws NotCompliantException
      * @throws RemoteFilenameException
      */
     public function __construct(string $file = null) {
@@ -194,6 +197,7 @@ class Id3 extends GetSet {
      * Process tag extraction
      * @return void
      * @throws FileReadException
+     * @throws NotCompliantException
      */
     public function processFile(): void {
         if (($this->_reader = fopen($this->_mediaFile, 'r')) === false) {
@@ -230,31 +234,27 @@ class Id3 extends GetSet {
     /**
      * Extract ID3 Headers
      * @return void
+     * @throws NotCompliantException
      */
     protected function extractHeaders(): void {
-        try {
-            $this->_headers = fread($this->_reader, 10);
-            $this->_headers = unpack("a3signature/c1version_major/c1version_minor/c1flags/Nsize", $this->_headers);
-            if ($this->_headers['signature'] != 'ID3') {
-                throw new NotCompliantException(__METHOD__ . ' : This file does not contain ID3 v2 tag');
-            }
-
-            $this->_id3Version = sprintf('%d.%d', $this->_headers['version_major'], $this->_headers['version_minor']);
-            if (($this->_headers['flags'] & self::UNSYNCHRONIZE) == self::UNSYNCHRONIZE) {
-                error_log('ID3 header flag contains UNSYNCHROSINE');
-            }
-            if (($this->_headers['flags'] & self::EXTENDED_HEADER) == self::EXTENDED_HEADER) {
-                error_log('ID3 header flag contains EXTENDED_HEADER');
-            }
-            if (($this->_headers['flags'] & self::EXPERIMENTAL_INDICATOR) == self::EXPERIMENTAL_INDICATOR) {
-                error_log('ID3 header flag contains EXPERIMENTAL_INDICATOR');
-            }
-            if (($this->_headers['flags'] & self::FOOTER) == self::FOOTER) {
-                error_log('ID3 header flag contains FOOTER');
-            }
+        $this->_headers = fread($this->_reader, 10);
+        $this->_headers = unpack("a3signature/c1version_major/c1version_minor/c1flags/Nsize", $this->_headers);
+        if ($this->_headers['signature'] != 'ID3') {
+            throw new NotCompliantException(__METHOD__ . ' : This file does not contain ID3 v2 tag');
         }
-        catch (NotCompliantException $e) {
-            trigger_error($e->getMessage());
+
+        $this->_id3Version = sprintf('%d.%d', $this->_headers['version_major'], $this->_headers['version_minor']);
+        if (($this->_headers['flags'] & self::UNSYNCHRONIZE) == self::UNSYNCHRONIZE) {
+            error_log('ID3 header flag contains UNSYNCHROSINE');
+        }
+        if (($this->_headers['flags'] & self::EXTENDED_HEADER) == self::EXTENDED_HEADER) {
+            error_log('ID3 header flag contains EXTENDED_HEADER');
+        }
+        if (($this->_headers['flags'] & self::EXPERIMENTAL_INDICATOR) == self::EXPERIMENTAL_INDICATOR) {
+            error_log('ID3 header flag contains EXPERIMENTAL_INDICATOR');
+        }
+        if (($this->_headers['flags'] & self::FOOTER) == self::FOOTER) {
+            error_log('ID3 header flag contains FOOTER');
         }
     }
 
@@ -454,7 +454,7 @@ class Id3 extends GetSet {
         return intval(trim($this->getTle() ?: $this->getTlen() ?: ''));
     }
 
-    public function getAlbumImage(): ?Frame {
+    public function getAlbumImage(): ?Apic {
         $images = $this->getPic() ?: $this->getApic() ?: null;
         if ($images instanceof Collection) {
             foreach ($images as $item) {
