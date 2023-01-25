@@ -9,9 +9,13 @@ class TBaseFrame extends BaseFrame {
     public function __construct(string $tag, int $size, $flags, &$reader, int $id3Size) {
         parent::__construct($tag, $size, $flags, $reader, $id3Size);
 
-        $this->encoding = ord(fread($reader, 1));
-        $this->value = preg_replace('/[[:^print:]]/', '', fread($reader, $this->size - 1));
-        $this->value = iconv($this->translateEncoding(), 'UTF-8', $this->value);
+        $this->encoding = fread($reader, 1);
+        $this->value = fread($reader, $this->size - 1);
+        $this->value = mb_convert_encoding(
+            $this->value,
+            'UTF-8',
+            mb_detect_encoding($this->value, ['unicode', 'ASCII', 'ISO-8859-1'])
+        );
     }
 
     /**
@@ -28,17 +32,6 @@ class TBaseFrame extends BaseFrame {
         $this->value = $value;
 
         return $this;
-    }
-
-    private function translateEncoding(): string {
-        return match ($this->encoding) {
-            0x00    => 'ISO-8859-1',
-            0x01    => 'UTF-16',
-            0x02    => 'UTF-16BE',
-            0x03    => 'UTF-8',
-            0x04    => 'UTF-16LE',
-            default => 'UTF-8'
-        };
     }
 
     public function pack(): string {
