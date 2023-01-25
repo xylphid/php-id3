@@ -21,14 +21,14 @@ Step by step extraction :
 use Id3\Id3;
 
 $media = '/path/to/media/file.mp3';
-$id3 = new Id3();
+$id3 = new Id3Parser();
 $id3->setFilename($media);
 $id3->processFile();
 ```
 Auto process :
 ```php
 $media = '/path/to/media/file.mp3';
-$id3 = new Id3($media);
+$id3 = new Id3Parser($media);
 ```
 
 Found tags are registered as object properties and named according to Id3 specifications. You can display tags with :

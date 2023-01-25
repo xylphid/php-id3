@@ -1,6 +1,7 @@
 <?php
 // Edit include path
 use Id3\Id3;
+use Id3\Id3Parser;
 
 $include_paths = array(
         get_include_path(),
@@ -28,9 +29,9 @@ $autoProcess = false;
 $media = '/tmp/media.mp3';
 
 if ($autoProcess) {
-    $id3 = new Id3($media);
+    $id3 = new Id3Parser($media);
 } else {
-    $id3 = new Id3();
+    $id3 = new Id3Parser();
     $id3->setFilename($media);
     $id3->processFile();
 }
@@ -53,4 +54,5 @@ if ($id3->isCompliant()) {
     printf("Genre : %s\n", $id3->getGenre());
     printf("Year : %s\n", $id3->getYear());
     printf("Duration : %s\n", $id3->getDuration());
+//    print_r($id3);
 }
