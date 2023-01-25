@@ -142,7 +142,7 @@ class Id3Parser extends Id3Accessor {
             error_log($e->getMessage());
         }
     }
-    
+
     public function isCompliant(): bool {
         return $this->compliant;
     }

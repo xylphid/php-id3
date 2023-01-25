@@ -11,6 +11,7 @@ class TBaseFrame extends BaseFrame {
 
         $this->encoding = ord(fread($reader, 1));
         $this->value = preg_replace('/[[:^print:]]/', '', fread($reader, $this->size - 1));
+        $this->value = iconv($this->translateEncoding(), 'UTF-8', $this->value);
     }
 
     /**
@@ -27,6 +28,17 @@ class TBaseFrame extends BaseFrame {
         $this->value = $value;
 
         return $this;
+    }
+
+    private function translateEncoding(): string {
+        return match ($this->encoding) {
+            0x00    => 'ISO-8859-1',
+            0x01    => 'UTF-16',
+            0x02    => 'UTF-16BE',
+            0x03    => 'UTF-8',
+            0x04    => 'UTF-16LE',
+            default => 'UTF-8'
+        };
     }
 
     public function pack(): string {
