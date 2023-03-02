@@ -146,4 +146,22 @@ class Id3Parser extends Id3Accessor {
     public function isCompliant(): bool {
         return $this->compliant;
     }
+
+    protected function guessDuration(): int {
+        $duration = 0;
+
+        $command = sprintf('ffmpeg -i "%s" 2>&1 | grep -o "Duration: [0-9:.]*"', $this->source);
+        $output = shell_exec($command);
+        if (!empty($output)) {
+            $output = str_replace('Duration: ', '', $output);
+
+            // Get the duration in seconds
+            $timeArr = array_reverse(explode(':', $output));
+            for ($i = 0; $i < sizeof($timeArr); $i++) {
+                $duration += $timeArr[$i] * pow(60, $i);
+            }
+        }
+
+        return intval($duration * 1000);
+    }
 }

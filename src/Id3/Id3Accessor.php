@@ -4,7 +4,7 @@ namespace Id3;
 use Id3\Frame\ApicFrame;
 use Id3\Std\Collection;
 
-class Id3Accessor extends GetSet {
+abstract class Id3Accessor extends GetSet {
     protected function _get($property): mixed {
         if (property_exists($this, $property) || array_key_exists($property, $this->_properties)) {
             return parent::_get($property);
@@ -12,6 +12,8 @@ class Id3Accessor extends GetSet {
             return null;
         }
     }
+
+    protected abstract function guessDuration(): int;
 
     public function getAlbum(): string {
         return trim($this->getTal() ?: $this->getTalb() ?: '');
@@ -45,7 +47,7 @@ class Id3Accessor extends GetSet {
 
     public function getDuration(): int {
         $frame = $this->getTle() ?: $this->getTlen() ?: null;
-        return intval($frame?->getValue());
+        return $frame ? intval($frame?->getValue()) : $this->guessDuration();
     }
 
     public function getPartOfSet(): string {
