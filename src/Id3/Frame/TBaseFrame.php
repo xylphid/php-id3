@@ -1,6 +1,8 @@
 <?php
 namespace Id3\Frame;
 
+use Id3\Id3Encoding;
+
 class TBaseFrame extends BaseFrame {
     public const MULTIPLE = false;
     protected string $encoding;
@@ -14,7 +16,7 @@ class TBaseFrame extends BaseFrame {
         $this->value = mb_convert_encoding(
             $this->value,
             'UTF-8',
-            mb_detect_encoding($this->value, ['unicode', 'ASCII', 'ISO-8859-1'])
+            Id3Encoding::from(bin2hex($this->encoding))->toString()
         );
     }
 
